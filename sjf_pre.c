@@ -3,20 +3,25 @@
 #include <time.h>
 struct P
 {
-    int wait_t,burst_t,arr_t,turn_t;
-    int p_id,touched,start;
+    long wait_t,burst_t,arr_t,turn_t;
+    long p_id,bt;
 };
+double avgt=0,avgw=0;
 typedef struct P PROCESS;
-void getData(PROCESS **list,int size)
+void getData(PROCESS **list,long size)
 {
-    int i;
+    long i;
     printf("\n Enter burst time and arrival time:");
     for(i=0;i<size;i++)
     {   
         list[i] = (PROCESS*)calloc(1,sizeof(PROCESS));
-        scanf("%d%d",&list[i]->burst_t,&list[i]->arr_t);
+        if( list[i] == NULL)
+            printf("asdasd");
+        //scanf("%d%d",&list[i]->burst_t,&list[i]->arr_t);
+        list[i]->burst_t = rand() % 32000;
+        list[i]->arr_t = rand() % 32000;
         list[i]->p_id = i;
-
+        list[i]->bt=list[i]->burst_t;
     }
     
 }
@@ -32,12 +37,12 @@ void getData(PROCESS **list,int size)
                 list[j] = list[j+1];
                 list[j+1] = temp;
             }
-}
-void sort_arr(PROCESS **list, int size,int start,int end)
+}*/
+void sort_arr(PROCESS **list, long size,long start,long end)
 {
    // printf("helo");
     PROCESS *temp;
-    int i,j;
+    long i,j;
     for(i=0;i<size;i++)
         for(j=start;j<size-i-1;j++)
             if(list[j]->arr_t > list[j+1]->arr_t)
@@ -46,27 +51,29 @@ void sort_arr(PROCESS **list, int size,int start,int end)
                 list[j] = list[j+1];
                 list[j+1] = temp;
             }
-}*/
-void show_data(PROCESS  **list, int size)
+}
+void show_data(PROCESS  **list, long size)
 {
-    int i;
+    long i;
     for(i=0;i<size;i++)
     {
-        printf("\n %d - %d,%d ",list[i]->p_id,list[i]->turn_t,list[i]->arr_t);
+        printf("\n %ld - %ld,%ld,%ld,%ld ",list[i]->p_id,list[i]->bt,list[i]->arr_t,list[i]->turn_t,list[i]->wait_t);
         
     }
 }
 
-int least_burst(PROCESS **list,int till,int size)
+long least_burst(PROCESS **list,long till,long size)
 {
    
     list[size-1] = (PROCESS*)calloc(1,sizeof(PROCESS));
-    list[size-1]->burst_t=99999;
-    int least = size-1;
+    list[size-1]->burst_t=999999;
+    long least = size-1;
     
-    int i;
+    long i;
     for(i=0;i<size;i++)
     {
+        if(list[i]->burst_t == 0)
+            continue;
         if(list[i]->arr_t <= till && list[i]->burst_t < list[least]->burst_t && list[i]->burst_t > 0)
         {
             least = i;
@@ -74,11 +81,11 @@ int least_burst(PROCESS **list,int till,int size)
     }
     return least;
 }
-void SJF(PROCESS ** list,int size)
+void SJF(PROCESS ** list,long size)
 {
-    int count_timer=0,end,num=0;
+    long count_timer=0,end,num=0;
     for(count_timer=0; num != size ; count_timer++){
-        int until = least_burst(list,count_timer,size+1);
+        long until = least_burst(list,count_timer,size+1);
        
         list[until]->burst_t--;
        
@@ -86,22 +93,41 @@ void SJF(PROCESS ** list,int size)
         {  
             num++;
             //count_timer++; 
-            end = count_timer+1;        
-            list[until]->turn_t = (end - list[until]->arr_t );
-            printf("\n%d,%d",list[until]->turn_t,end);
+            end = count_timer+1;  
+                  
+           //list[until]->turn_t = (end - list[until]->arr_t );
+            //list[until]->wait_t = 
+            avgt += ((double)(end - list[until]->arr_t) / (double)size);
+            avgw += ((double)((end - list[until]->arr_t) - list[until]->bt) / (double)size);
+            //printf("\n%ld,%ld",list[until]->turn_t,list[until]->wait_t);
         }
      
     }
 }
+
 int main()
 {
-    int size;
-    scanf("%d", &size);
+    srand(time(NULL));
+    long size;
+    clock_t start,end;
+    scanf("%ld", &size);
     PROCESS ** list = (PROCESS**)calloc(size+1,sizeof(PROCESS));
+    if(list==NULL)
+    {
+       printf("\n ASFDASFDASD");
+    }
     //PROCESS list[100];
     getData(list,size);
-    //sort_arr(list,size,0,size-1);
+    //`sort_arr(list,size,0,size-1);
+    start = clock();
     SJF(list,size);
+    end = clock();
     show_data(list,size);
+    long i=0;
+    printf("\n turn = %lf \t wait = %lf",avgt,avgw);
+    printf("\n Processing rate : %lf",(double)(end-start)/CLOCKS_PER_SEC);
+    for(i=0;i<size;i++)
+        free(list[i]);
+    free(list);
     return 0;
-}
+};
