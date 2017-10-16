@@ -11,7 +11,7 @@ typedef struct P PROCESS;
 void getData(PROCESS **list,long size)
 {
     long i;
-    printf("\n Enter burst time and arrival time:");
+    //printf("\n Enter burst time and arrival time:");
     for(i=0;i<size;i++)
     {   
         list[i] = (PROCESS*)calloc(1,sizeof(PROCESS));
@@ -72,29 +72,39 @@ void SJF(PROCESS ** list,long size)
     }
 }
 
-int main()
+int main(int argc,char * argv[])
 {
     srand(time(NULL));
-    long size=100;
+    long size=100,i,j;
     clock_t start,end;
-    scanf("%ld", &size);
-    PROCESS ** list = (PROCESS**)calloc(size+1,sizeof(PROCESS));
-    if(list==NULL)
-    {
-       printf("\n ASFDASFDASD");
-    }
+    i = atoi(argv[1]);
+    //printf("%ld",i);
+    
+    //:fflush(stdout);
+    //scanf("%ld", &i);
     //PROCESS list[100];
-    getData(list,size);
     //`sort_arr(list,size,0,size-1);
-    start = clock();
-    SJF(list,size);
-    end = clock();
-    show_data(list,size);
-    long i=0;
-    printf("\n turn = %lf \t wait = %lf",avgt,avgw);
-    printf("\n Processing rate : %lf",(double)(end-start)/CLOCKS_PER_SEC);
-    for(i=0;i<size;i++)
-        free(list[i]);
-    free(list);
+    //for(i=10;i<size;i+=50)
+    {
+        PROCESS ** list = (PROCESS**)calloc(i+1,sizeof(PROCESS));
+        if(list==NULL)
+        {
+            printf("\n ASFDASFDASD");
+        }
+        avgt=avgw=0;
+        getData(list,i);
+        start = clock();
+        SJF(list,i);
+        end = clock();
+        printf("\n %lf : %lf",avgt,avgw);
+        //printf("\n  %ld : %lf",i,(double)(end-start)/CLOCKS_PER_SEC);
+        fflush(stdout);
+        for(j=0;j<i;j++)
+            free(list[j]);
+        free(list);
+    }
+    //show_data(list,size);
+    //long i=0;
+    
     return 0;
 };
